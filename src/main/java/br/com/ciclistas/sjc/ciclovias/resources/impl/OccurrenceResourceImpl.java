@@ -87,7 +87,7 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 			String imageName = "IMG-" + Calendar.getInstance().getTimeInMillis() + ".jpg";
 			Path path = Paths.get(pathOccurrenceImages + imageName);
 			createFile(path, part);
-			paths.add(URL_CONTEXT.concat("/").concat(PATH_OCCURRENCES_IMAGES).concat(imageName));
+			paths.add(URL_CONTEXT.concat(PATH_OCCURRENCES_IMAGES).concat("/").concat(imageName));
 		});
 		
 		return paths;
