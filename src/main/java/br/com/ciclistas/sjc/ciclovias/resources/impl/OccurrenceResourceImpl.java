@@ -35,9 +35,9 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 	@Inject
 	private Logger logger;
 	
-	private static final String CONTENT_PATH = System.getProperty("jboss.home.dir").concat("/welcome-content");
-	private static final String PATH_OCCURRENCES_IMAGES = System.getProperty("path.images.ciclovias");
-	private static final String URL_CONTEXT = System.getProperty("url.context.ciclovias");
+	private static final String CONTENT_PATH = System.getProperty("jboss.home.dir");
+	private static final String PATH_OCCURRENCES_IMAGES = System.getProperty("path_images_ciclovias");
+	private static final String URL_CONTEXT = System.getProperty("url_context_ciclovias");
 
 	@Inject
 	private Occurrences occurrences;
