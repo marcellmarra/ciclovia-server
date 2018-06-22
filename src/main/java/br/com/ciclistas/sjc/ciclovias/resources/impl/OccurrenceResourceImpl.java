@@ -79,6 +79,8 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 
 		String pathOccurrenceImages = CONTENT_PATH + PATH_OCCURRENCES_IMAGES;
 		
+		System.out.println("È feio, eu sei .... " + pathOccurrenceImages);
+		
 		List<String> paths = new ArrayList<>();
 		
 		imageParts.forEach(part -> {
