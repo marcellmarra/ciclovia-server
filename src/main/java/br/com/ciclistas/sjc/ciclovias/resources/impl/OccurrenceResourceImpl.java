@@ -35,9 +35,9 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 	@Inject
 	private Logger logger;
 	
-	private static final String CONTENT_PATH = System.getProperty("jboss.home.dir").concat("/");
-	private static final String PATH_OCCURRENCES_IMAGES = System.getenv("PATH_IMAGES_CICLOVIAS");
-	private static final String URL_CONTEXT = System.getenv("URL_CONTEXT_CICLOVIAS");
+	private static final String CONTENT_PATH = System.getProperty("WELCOME_CONTENT");
+	private static final String PATH_OCCURRENCES_IMAGES = System.getProperty("PATH_IMAGES_CICLOVIAS");
+	private static final String URL_CONTEXT = System.getProperty("URL_CONTEXT_CICLOVIAS");
 
 	@Inject
 	private Occurrences occurrences;
@@ -50,7 +50,6 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 
 	@Override
 	public Response allOccurrence() {
-		System.out.println(System.getProperty("apenas.teste") + " José");
 		return Response.ok(occurrences.listAll()).build();
 	}
 
@@ -76,17 +75,13 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 	
 	private List<String> saveFile(final List<InputPart> imageParts) {
 
-		logger.info("Salvando Arquivos da Ocorrencia");
-
-		String pathOccurrenceImages = CONTENT_PATH + PATH_OCCURRENCES_IMAGES;
-		
-		System.out.println("È feio, eu sei .... " + pathOccurrenceImages);
+		logger.info("Salvando Arquivos da Ocorrencia em: " + CONTENT_PATH);
 		
 		List<String> paths = new ArrayList<>();
 		
 		imageParts.forEach(part -> {
 			String imageName = "IMG-" + Calendar.getInstance().getTimeInMillis() + ".jpg";
-			Path path = Paths.get(pathOccurrenceImages + imageName);
+			Path path = Paths.get(CONTENT_PATH + imageName);
 			createFile(path, part);
 			paths.add(URL_CONTEXT.concat(PATH_OCCURRENCES_IMAGES).concat("/").concat(imageName));
 		});
