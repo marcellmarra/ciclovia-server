@@ -50,6 +50,7 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 
 	@Override
 	public Response allOccurrence() {
+		System.out.println(System.getProperty("apenas.teste") + " José");
 		return Response.ok(occurrences.listAll()).build();
 	}
 
