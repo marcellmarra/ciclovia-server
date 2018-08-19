@@ -16,7 +16,9 @@ import java.time.format.DateTimeFormatter;
  */
 public class LocalDateSerializer extends StdSerializer<LocalDate> {
 
-    public LocalDateSerializer() {
+	private static final long serialVersionUID = 1L;
+
+	public LocalDateSerializer() {
         super(LocalDate.class);
     }
 
