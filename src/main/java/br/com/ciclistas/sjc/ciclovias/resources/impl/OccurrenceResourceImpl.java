@@ -1,14 +1,16 @@
 package br.com.ciclistas.sjc.ciclovias.resources.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
@@ -19,6 +21,19 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.util.IOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.ciclistas.sjc.ciclovias.model.entities.Occurrence;
@@ -32,13 +47,11 @@ import br.com.ciclistas.sjc.ciclovias.resources.OccurrenceResource;
 @Stateless
 public class OccurrenceResourceImpl implements OccurrenceResource {
 	
+	private static final String BUCKET_NAME = System.getProperty("amazon.s3.bucket-name");
+
 	@Inject
 	private Logger logger;
 	
-	private static final String CONTENT_PATH = System.getProperty("WELCOME_CONTENT");
-	private static final String PATH_OCCURRENCES_IMAGES = System.getProperty("PATH_IMAGES_CICLOVIAS");
-	private static final String URL_CONTEXT = System.getProperty("URL_CONTEXT_CICLOVIAS");
-
 	@Inject
 	private Occurrences occurrences;
 
@@ -48,6 +61,10 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 		return Response.created(URI.create("/occurrences/" + occurrence.getId())).build();
 	}
 
+	public static void main(String[] args) {
+		System.out.println(UUID.randomUUID());
+	}
+	
 	@Override
 	public Response allOccurrence() {
 		return Response.ok(occurrences.listAll()).build();
@@ -65,40 +82,40 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 
 		ObjectMapper mapper = new ObjectMapper();
 		Occurrence occurrence = mapper.readValue(occurrenceJson, Occurrence.class);
-
-		occurrence.setPathPhoto(saveFile(multipart.getFormDataMap().get("uploads")));
-		
+		List<String> urlImages = saveS3File(multipart.getFormDataMap().get("uploads"));
+		occurrence.setPathPhoto(urlImages);
 		occurrences.save(occurrence);
 		
 		return Response.created(URI.create("/occurrences/" + occurrence.getId())).entity(occurrence).build();
 	}
 	
-	private List<String> saveFile(final List<InputPart> imageParts) {
-
-		logger.info("Salvando Arquivos da Ocorrencia em: " + CONTENT_PATH);
+	private List<String> saveS3File(List<InputPart> files) {
+		
+		logger.info("Saving files on Amazon S3");
 		
 		List<String> paths = new ArrayList<>();
 		
-		imageParts.forEach(part -> {
-			String imageName = "IMG-" + Calendar.getInstance().getTimeInMillis() + ".jpg";
-			Path path = Paths.get(CONTENT_PATH + imageName);
-			createFile(path, part);
-			paths.add(URL_CONTEXT.concat(PATH_OCCURRENCES_IMAGES).concat("/").concat(imageName));
-		});
-		
-		return paths;
-
-	}
-
-	private void createFile(Path path, InputPart part) {
-
-		try {
-
-			Files.write(path, part.getBody(byte[].class, null), StandardOpenOption.CREATE);
-
-		} catch (IOException e) {
-			logger.severe(ExceptionUtils.getStackTrace(e));
+        try {
+        	
+        	AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+        			.withRegion(Region.getRegion(Regions.US_EAST_1).getName())
+        			.withCredentials(new ProfileCredentialsProvider())
+        			.build();
+        	
+        	ObjectMetadata metadata = new ObjectMetadata();
+        	metadata.setContentType("image/jpeg");
+        	
+        	for(InputPart file : files) {
+        		InputStream is = file.getBody(InputStream.class, null);
+        		String fileName = UUID.randomUUID() + ".jpeg";
+        		s3Client.putObject(new PutObjectRequest(BUCKET_NAME, fileName, is, metadata).withCannedAcl(CannedAccessControlList.PublicRead));
+        		paths.add(s3Client.getUrl(BUCKET_NAME, fileName).toString());
+        	}
+			
+        } catch (IOException e) {
+			logger.severe(e.getMessage());
 		}
+		
+        return paths;
 	}
-
 }

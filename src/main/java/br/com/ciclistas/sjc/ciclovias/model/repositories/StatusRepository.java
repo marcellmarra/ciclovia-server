@@ -9,4 +9,4 @@ import br.com.ciclistas.sjc.ciclovias.model.entities.Status;
  *
  */
 @Stateless
-public class StatusRepositoty extends Repository<Status> { }
+public class StatusRepository extends Repository<Status> { }

@@ -4,7 +4,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
-import br.com.ciclistas.sjc.ciclovias.model.repositories.StatusRepositoty;
+import br.com.ciclistas.sjc.ciclovias.model.repositories.StatusRepository;
 import br.com.ciclistas.sjc.ciclovias.resources.StatusResource;
 
 /**
@@ -15,7 +15,7 @@ import br.com.ciclistas.sjc.ciclovias.resources.StatusResource;
 public class StatusResourceImpl implements StatusResource {
 	
 	@Inject
-	private StatusRepositoty stausRepository;
+	private StatusRepository stausRepository;
 	
 	@Override
 	public Response getAllStatus() {
