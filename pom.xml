@@ -14,7 +14,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<failOnMissingWebXml>false</failOnMissingWebXml>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.h2>1.4.197</version.h2>
+		<version.mysql>8.0.12</version.mysql>
 	</properties>
 
 	<dependencyManagement>
@@ -51,9 +51,9 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>${version.h2}</version>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${version.mysql}</version>
 		</dependency>
 
 		<dependency>

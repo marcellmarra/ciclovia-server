@@ -9,7 +9,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "occurrence_type")
+@Table(name = "OCCURRENCE_TYPE")
 public class OccurrenceType extends DefaultEntity {
 
 	private static final long serialVersionUID = -2642088687432648811L;

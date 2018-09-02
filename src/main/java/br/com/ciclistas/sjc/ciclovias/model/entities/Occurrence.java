@@ -3,6 +3,7 @@ package br.com.ciclistas.sjc.ciclovias.model.entities;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -21,7 +22,7 @@ import br.com.ciclistas.sjc.ciclovias.resources.config.LocalDateSerializer;
  *
  */
 @Entity
-@Table(name = "occurrence")
+@Table(name = "OCCURRENCE")
 public class Occurrence extends DefaultEntity {
 
 	private static final long serialVersionUID = 6683654832605009831L;
@@ -42,6 +43,7 @@ public class Occurrence extends DefaultEntity {
 	
 	private String location;
 	
+	@CollectionTable(name="PATH_PHOTOS")
 	@ElementCollection(fetch = FetchType.EAGER)
 	private List<String> pathPhoto;
 	

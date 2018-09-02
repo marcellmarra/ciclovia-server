@@ -3,26 +3,20 @@ package br.com.ciclistas.sjc.ciclovias.resources.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
@@ -31,9 +25,6 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectResult;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.util.IOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.ciclistas.sjc.ciclovias.model.entities.Occurrence;
@@ -54,15 +45,14 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 	
 	@Inject
 	private Occurrences occurrences;
+	
+	@Context 
+	private SecurityContext securityContext;
 
 	@Override
 	public Response newOccurrence(final Occurrence occurrence) {
 		occurrences.save(occurrence);
 		return Response.created(URI.create("/occurrences/" + occurrence.getId())).build();
-	}
-
-	public static void main(String[] args) {
-		System.out.println(UUID.randomUUID());
 	}
 	
 	@Override
@@ -77,6 +67,8 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 
 	@Override
 	public Response newOccurrenceWithUploads(MultipartFormDataInput multipart) throws IOException {
+		
+		logger.info("Is admin? " + securityContext.isUserInRole("admin"));
 		
 		String occurrenceJson = multipart.getFormDataPart("occurrence", String.class, null);
 

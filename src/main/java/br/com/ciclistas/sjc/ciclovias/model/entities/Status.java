@@ -9,7 +9,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "status")
+@Table(name = "STATUS")
 public class Status extends DefaultEntity {
 
 	private static final long serialVersionUID = 6846487498523797594L;

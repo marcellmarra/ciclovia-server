@@ -1,16 +1,16 @@
 swarm:
   datasources:
+    jdbc-drivers:
+      com.mysql:
+        driver-class-name: com.mysql.jdbc.Driver
+        xa-datasource-class-name: com.mysql.jdbc.jdbc2.optional.MysqlXADataSource
+        driver-module-name: com.mysql
     data-sources:
       CicloviasDS:
-        driver-name: h2
-        connection-url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-        user-name: sa
-        password: sa
-    jdbc-drivers:
-      CicloviasDS:
-        driver-class-name: org.h2.Driver
-        xa-datasource-name: org.h2.jdbcx.JdbcDataSource
-        driver-module-name: com.h2database.h2
+        driver-name: com.mysql
+        connection-url: ${env.MYSQL_CONNECTION}
+        user-name: ${env.MYSQL_USERNAME}
+        password: ${env.MYSQL_PASSWORD}
 amazon:
   s3:
     bucket-name: bicycle-path-images
