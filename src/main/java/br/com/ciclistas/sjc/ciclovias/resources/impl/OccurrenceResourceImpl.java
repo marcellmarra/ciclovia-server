@@ -3,6 +3,8 @@ package br.com.ciclistas.sjc.ciclovias.resources.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -10,21 +12,12 @@ import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
+import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.ciclistas.sjc.ciclovias.model.entities.Occurrence;
@@ -38,16 +31,14 @@ import br.com.ciclistas.sjc.ciclovias.resources.OccurrenceResource;
 @Stateless
 public class OccurrenceResourceImpl implements OccurrenceResource {
 	
-	private static final String BUCKET_NAME = System.getProperty("amazon.s3.bucket-name");
-
 	@Inject
 	private Logger logger;
 	
 	@Inject
 	private Occurrences occurrences;
 	
-	@Context 
-	private SecurityContext securityContext;
+	//@Context 
+	//private SecurityContext securityContext;
 
 	@Override
 	public Response newOccurrence(final Occurrence occurrence) {
@@ -68,46 +59,50 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 	@Override
 	public Response newOccurrenceWithUploads(MultipartFormDataInput multipart) throws IOException {
 		
-		logger.info("Is admin? " + securityContext.isUserInRole("admin"));
+		logger.info("Saving new occurrence!");
+		
+		//logger.info("Is admin? " + securityContext.isUserInRole("admin"));
 		
 		String occurrenceJson = multipart.getFormDataPart("occurrence", String.class, null);
 
 		ObjectMapper mapper = new ObjectMapper();
 		Occurrence occurrence = mapper.readValue(occurrenceJson, Occurrence.class);
-		List<String> urlImages = saveS3File(multipart.getFormDataMap().get("uploads"));
+		
+		List<InputPart> photos = multipart.getFormDataMap().get("uploads");
+		
+		List<String> urlImages = savePhoto(photos);
+		
 		occurrence.setPathPhoto(urlImages);
 		occurrences.save(occurrence);
 		
-		return Response.created(URI.create("/occurrences/" + occurrence.getId())).entity(occurrence).build();
+		return Response.created(URI.create("/occurrences/" + occurrence.getId()))
+					   .entity(occurrence).build();
 	}
 	
-	private List<String> saveS3File(List<InputPart> files) {
+	private List<String> savePhoto(List<InputPart> photos) {
 		
-		logger.info("Saving files on Amazon S3");
-		
+		String localPath = System.getProperty("path.image.dir");
 		List<String> paths = new ArrayList<>();
 		
-        try {
-        	
-        	AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-        			.withRegion(Region.getRegion(Regions.US_EAST_1).getName())
-        			.withCredentials(new ProfileCredentialsProvider())
-        			.build();
-        	
-        	ObjectMetadata metadata = new ObjectMetadata();
-        	metadata.setContentType("image/jpeg");
-        	
-        	for(InputPart file : files) {
-        		InputStream is = file.getBody(InputStream.class, null);
-        		String fileName = UUID.randomUUID() + ".jpeg";
-        		s3Client.putObject(new PutObjectRequest(BUCKET_NAME, fileName, is, metadata).withCannedAcl(CannedAccessControlList.PublicRead));
-        		paths.add(s3Client.getUrl(BUCKET_NAME, fileName).toString());
-        	}
+		for (InputPart photo : photos) {
 			
-        } catch (IOException e) {
-			logger.severe(e.getMessage());
+			String fileName = UUID.randomUUID() + ".jpeg";
+			
+			try {
+				
+				InputStream is = photo.getBody(InputStream.class,null);
+				
+				String pathAndFileName = localPath + "/" + fileName;
+				Files.write(Paths.get(pathAndFileName), IOUtils.toByteArray(is));
+				
+				paths.add(System.getProperty("web.context") + "/images/" + fileName);
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
-        return paths;
+		return paths;
 	}
+	
 }

@@ -1,26 +1,26 @@
 swarm:
-  deployment:
-    demo.war:
-      web:
-        login-config:
-          auth-method: BASIC
-          security-domain: my-domain
-        security-constraints:
-          - url-pattern: /api/*
-            methods: [POST,PUT,DELETE]
-            roles: [admin]
-  security:
-    security-domains:
-      my-domain:
-        classic-authentication:
-          login-modules:
-            Database:
-              code: Database
-              flag: required
-              module-options:
-                dsJndiName: java:jboss/datasources/CicloviasDS
-                principalsQuery: SELECT password FROM SYS_USER WHERE name=?
-                rolesQuery: SELECT role, 'Roles' FROM SYS_USER WHERE name=?
+  #deployment:
+  #  demo.war:
+  #    web:
+  #      login-config:
+  #        auth-method: BASIC
+  #        security-domain: my-domain
+  #      security-constraints:
+  #        - url-pattern: /api/*
+  #          methods: [POST,PUT,DELETE]
+  #          roles: [admin]
+  #security:
+  #  security-domains:
+  #    my-domain:
+  #      classic-authentication:
+  #        login-modules:
+  #          Database:
+  #            code: Database
+  #            flag: required
+  #            module-options:
+  #              dsJndiName: java:jboss/datasources/CicloviasDS
+  #               principalsQuery: SELECT password FROM SYS_USER WHERE name=?
+  #              rolesQuery: SELECT role, 'Roles' FROM SYS_USER WHERE name=?
   datasources:
     jdbc-drivers:
       com.mysql:
@@ -33,6 +33,3 @@ swarm:
         connection-url: ${env.MYSQL_CONNECTION}
         user-name: ${env.MYSQL_USERNAME}
         password: ${env.MYSQL_PASSWORD}
-amazon:
-  s3:
-    bucket-name: bicycle-path-images

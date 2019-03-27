@@ -1,7 +1,7 @@
 -- INSERT STATUS --
-INSERT INTO STATUS (ID, NAME, PIN_NAME, DESCRIPTION) VALUES (1, 'Ciclovia não esta bem', 'pin-01.png', 'Description');
-INSERT INTO STATUS (ID, NAME, PIN_NAME, DESCRIPTION) VALUES (2, 'Manutenção sendo realizada', 'pin-02.png', 'Description 2');
-INSERT INTO STATUS (ID, NAME, PIN_NAME, DESCRIPTION) VALUES (3, 'Manutenção sendo realizada 2', 'pin-02.png', 'Description 2');
+INSERT INTO STATUS (ID, NAME, PIN_NAME, DESCRIPTION) VALUES (1, 'Ciclovia não esta bem (problemas de infra-estrurura)', 'pin-01.png', 'Description');
+INSERT INTO STATUS (ID, NAME, PIN_NAME, DESCRIPTION) VALUES (2, 'Tem reforma sendo feita (manutenção)', 'pin-02.png', 'Description 2');
+INSERT INTO STATUS (ID, NAME, PIN_NAME, DESCRIPTION) VALUES (3, 'Trecho perigoso (esse ponto merece atenção)', 'pin-02.png', 'Description 2');
 
 
 -- INSERT TYPE --
