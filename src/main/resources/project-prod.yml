@@ -33,3 +33,11 @@ swarm:
         connection-url: ${env.MYSQL_CONNECTION}
         user-name: ${env.MYSQL_USERNAME}
         password: ${env.MYSQL_PASSWORD}
+        
+web:
+  context: http://165.22.154.252/
+  dir: /usr/share/nginx/html/
+  
+path:
+  image:
+    dir: ${web.dir}/images/

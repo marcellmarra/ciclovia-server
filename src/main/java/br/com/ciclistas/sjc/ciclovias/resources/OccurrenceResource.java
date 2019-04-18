@@ -28,7 +28,7 @@ public interface OccurrenceResource {
 	Response newOccurrence(Occurrence occurrence);
 	
 	@POST
-	@Consumes("multipart/form-data; charset=UTF-8")
+	@Consumes("multipart/form-data;charset=UTF-8")
 	@Path(value = "/upload")
 	Response newOccurrenceWithUploads(MultipartFormDataInput multipart) throws IOException;
 	
