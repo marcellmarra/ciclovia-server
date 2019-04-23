@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import br.com.ciclistas.sjc.ciclovias.model.entities.Occurrence;
+import io.swagger.annotations.Api;
 
 /**
  * @author Pedro Hos
@@ -22,6 +23,7 @@ import br.com.ciclistas.sjc.ciclovias.model.entities.Occurrence;
 @Path("occurrences")
 @Consumes("application/json; charset=UTF-8")
 @Produces("application/json; charset=UTF-8")
+@Api(value="/occurrences", tags = "occurrences")
 public interface OccurrenceResource {
 	
 	@POST

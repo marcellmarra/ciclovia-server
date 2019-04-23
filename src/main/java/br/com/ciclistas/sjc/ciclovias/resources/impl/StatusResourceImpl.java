@@ -6,6 +6,7 @@ import javax.ws.rs.core.Response;
 
 import br.com.ciclistas.sjc.ciclovias.model.repositories.StatusRepository;
 import br.com.ciclistas.sjc.ciclovias.resources.StatusResource;
+import br.com.ciclistas.sjc.ciclovias.resources.utils.JaxrsUtils;
 
 /**
  * @author Pedro Hos
@@ -19,7 +20,7 @@ public class StatusResourceImpl implements StatusResource {
 	
 	@Override
 	public Response getAllStatus() {
-		return Response.ok(stausRepository.listAll()).build();
+		return Response.ok(JaxrsUtils.throw404IfNull(stausRepository.listAll())).build();
 	}
 	
 	

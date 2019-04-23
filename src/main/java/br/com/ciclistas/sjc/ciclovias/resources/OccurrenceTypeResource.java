@@ -7,6 +7,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.swagger.annotations.Api;
+
 /**
  * @author Pedro Hos
  *
@@ -15,6 +17,7 @@ import javax.ws.rs.core.Response;
 @Path("type")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Api(value="/type", tags = "type")
 public interface OccurrenceTypeResource {
 	
 	@GET

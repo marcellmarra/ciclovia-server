@@ -2,9 +2,11 @@ package br.com.ciclistas.sjc.ciclovias.model.repositories;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -35,14 +37,18 @@ public abstract class Repository<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<T> listAll() {
+	public Optional<List<T>> listAll() {
+
 		CriteriaQuery<Object> cq = em.getCriteriaBuilder().createQuery();
 		cq.select(cq.from(type));
-		return (List<T>) em.createQuery(cq).getResultList();
+		List<T> list = (List<T>) em.createQuery(cq).getResultList();
+		
+		return list.isEmpty() ? Optional.empty() : Optional.ofNullable(list);
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<T> listAllPaginated(int total, int pg) {
+	public Optional<List<T>> listAllPaginated(int total, int pg) {
+		
 		CriteriaQuery<Object> cq = em.getCriteriaBuilder().createQuery();
 		cq.select(cq.from(type));
 
@@ -51,15 +57,28 @@ public abstract class Repository<T> {
 		busca.setFirstResult(pg * total);
 		busca.setMaxResults(total);
 
-		return (List<T>) busca.getResultList();
+		List<T> list = (List<T>) em.createQuery(cq).getResultList();
+		
+		return list.isEmpty() ? Optional.empty() : Optional.ofNullable(list);
 	}
 
-	public T findById(long id) {
-		return em.find(type, id);
+	public Optional<T> findById(long id) {
+		
+		try {
+			return Optional.ofNullable(em.find(type, id));
+		} catch (NoResultException e) {
+			return Optional.empty();
+		}
+		
 	}
 
-	public T update(T entidade) {
-		return em.merge(entidade);
+	public Optional<T> update(T entidade) {
+		
+		try {
+			return Optional.ofNullable(em.merge(entidade));
+		} catch (NoResultException e) {
+			return Optional.empty();
+		}
 	}
 
 	public long countAll() {

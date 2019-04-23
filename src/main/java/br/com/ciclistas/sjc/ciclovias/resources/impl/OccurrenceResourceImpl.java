@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -18,11 +19,14 @@ import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.ciclistas.sjc.ciclovias.model.entities.Occurrence;
 import br.com.ciclistas.sjc.ciclovias.model.repositories.Occurrences;
 import br.com.ciclistas.sjc.ciclovias.resources.OccurrenceResource;
+import br.com.ciclistas.sjc.ciclovias.resources.utils.JaxrsUtils;
 
 /**
  * @author Pedro Hos
@@ -48,12 +52,13 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 	
 	@Override
 	public Response allOccurrence() {
-		return Response.ok(occurrences.listAll()).build();
+		
+		return Response.ok().entity(JaxrsUtils.throw404IfNull(occurrences.listAll())).build();
 	}
 
 	@Override
 	public Response findById(final Long id) {
-		return Response.ok(occurrences.findById(id)).build();
+		return Response.ok().entity(JaxrsUtils.throw404IfNull(occurrences.findById(id))).build();
 	}
 
 	@Override
@@ -62,21 +67,26 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 		logger.info("Saving new occurrence!");
 		
 		//logger.info("Is admin? " + securityContext.isUserInRole("admin"));
-		
-		String occurrenceJson = multipart.getFormDataPart("occurrence", String.class, null);
 
-		ObjectMapper mapper = new ObjectMapper();
-		Occurrence occurrence = mapper.readValue(occurrenceJson, Occurrence.class);
+		Occurrence occurrence = getOccurence(multipart);
 		
-		List<InputPart> photos = multipart.getFormDataMap().get("uploads");
+		Optional<List<InputPart>> photos = Optional.ofNullable(multipart.getFormDataMap().get("uploads"));
 		
-		List<String> urlImages = savePhoto(photos);
+		if(photos.isPresent()) {
+			List<String> urlImages = savePhoto(photos.get());
+			occurrence.setPathPhoto(urlImages);
+		}
 		
-		occurrence.setPathPhoto(urlImages);
 		occurrences.save(occurrence);
 		
 		return Response.created(URI.create("/occurrences/" + occurrence.getId()))
-					   .entity(occurrence).build();
+					   .entity(occurrence)
+					   .build();
+	}
+
+	private Occurrence getOccurence(MultipartFormDataInput multipart) throws IOException, JsonParseException, JsonMappingException {
+		Occurrence occurrence = new ObjectMapper().readValue(multipart.getFormDataPart("occurrence", String.class, null), Occurrence.class);
+		return occurrence;
 	}
 	
 	private List<String> savePhoto(List<InputPart> photos) {
@@ -90,7 +100,7 @@ public class OccurrenceResourceImpl implements OccurrenceResource {
 			
 			try {
 				
-				InputStream is = photo.getBody(InputStream.class,null);
+				InputStream is = photo.getBody(InputStream.class, null);
 				
 				String pathAndFileName = localPath + "/" + fileName;
 				Files.write(Paths.get(pathAndFileName), IOUtils.toByteArray(is));
